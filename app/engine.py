@@ -1,15 +1,39 @@
 import pandas as pd
+import random
+from music21 import midi, note
 
 class MusicEngine():
     def __init__(self):
         pass
 
-    def run(self):
-        df = pd.read_json(open('./data/all_my_loving.json'), orient="records")
-        first_six_bars = df[:23]
-        pitches, duration = first_six_bars['pitch'], first_six_bars['duration']
-        pitch_patterns = self.find_pitch_patterns(pitches)
-        rhythmic_pattern = self.find_rhythmic_pattern(duration)
+    def run(self, filename, melody_track=1):
+        midi_file = self.open_midi_file(filename)
+        stream = midi.translate.midiFileToStream(midi_file)
+        melody = stream.parts[melody_track]
+        new_melody = self.suggest_new_melody(melody)
+        player = midi.realtime.StreamPlayer(new_melody)
+        print("Playing the new melody")
+        player.play()
+
+    def suggest_new_melody(self, melody):
+        snippet = melody[:30]
+        options = self.analyze_melody(snippet)
+        snippet.append(random.sample(options, 1)[0])
+        return snippet
+
+    def analyze_melody(self, melody, strategy="same_direction"):
+        print("Analyzing...")
+        for note_obj in melody:
+            # Do stuff with note.pitch or something
+            pass
+        return [note.Note("B6", type="whole"), note.Note("B3", type="whole")]
+
+    def open_midi_file(self, filename):
+        print("Opening file...")
+        mf = midi.MidiFile()
+        mf.open(filename)
+        mf.read()
+        return mf
 
     def find_rhythmic_pattern(self, durations):
         # This method should try to notice, for instance,
@@ -21,5 +45,4 @@ class MusicEngine():
         # STEP 1 is to play around with the data in jupyter notebook
         pass
 
-MusicEngine().run()
-
+MusicEngine().run('./all_my_loving.midi')
