@@ -18,15 +18,17 @@ class MusicEngine():
     def suggest_new_melody(self, melody):
         snippet = melody[:30]
         options = self.analyze_melody(snippet)
-        snippet.append(random.sample(options, 1)[0])
+        new_note = random.sample(options, 1)[0]
+        print("Appending", new_note)
+        snippet.append(new_note)
         return snippet
 
     def analyze_melody(self, melody, strategy="same_direction"):
         print("Analyzing...")
-        for note_obj in melody:
-            # Do stuff with note.pitch or something
-            pass
-        return [note.Note("B6", type="whole"), note.Note("B3", type="whole")]
+        last_two_notes = list(filter(lambda n: isinstance(n, note.Note), melody))[-2:]
+        last_pitch = last_two_notes[-1].pitch.ps
+        last_movement = last_two_notes[-1].pitch.ps - last_two_notes[0].pitch.ps
+        return [note.Note(last_pitch + last_movement, type="whole"), note.Note(last_pitch - last_movement, type="whole")]
 
     def open_midi_file(self, filename):
         print("Opening file...")
